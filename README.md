@@ -12,13 +12,13 @@ Install tig
 
 Two operations are supported, getting updates and pushing updates.
 
-## Updating updates
+## Getting updates
 
 ```sh
 git update get
 ```
 
-## Pushing
+## Pushing updates
 ```sh
 git update push
 ```
