@@ -1,3 +1,8 @@
+# Gets the name of the local branch, prompting the user if necessary
+function get-local-branch() {
+}
+
+
 # Gets the update from the origin master
 function get-update() {
     run git fetch --all
@@ -54,6 +59,7 @@ function get-update() {
         exit 1;
     fi
 }
+
 
 # Pushes updates to origin master
 function push-update() {
