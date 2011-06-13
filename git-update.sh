@@ -1,5 +1,4 @@
 #!/bin/bash
-LOCAL_BRANCH=${GIT_LOCAL_BRANCH};
 
 SCRIPT_DIRECTORY=$(cd $(dirname $(readlink -f $0)) && pwd)
 command=$1;
@@ -13,14 +12,6 @@ Operation can be one of the following:
     push: Push updates from the master branch (requires tig)
 EOF
 }
-
-if [ -z $LOCAL_BRANCH ]; then
-    echo "Error: LOCAL_BRANCH not set";
-    exit 1;
-elif [ $LOCAL_BRANCH = "default" ]; then
-    echo "Error: LOCAL_BRANCH needs to be changed from default";
-    exit 1;
-fi
 
 function run() {
     echo;
@@ -43,10 +34,10 @@ localBranch=$branch
 
 case "$command" in
     push) echo "Going to push";
-        push-update;
+        push-update $localBranch;
         ;;
     get) echo "Going to update";
-        get-update;
+        get-update $localBranch;
         ;;
     *) echo "Didn't understand command \"$command\"";
         usage;

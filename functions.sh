@@ -21,6 +21,7 @@ function get-local-branch() {
 
 # Gets the update from the origin master
 function get-update() {
+    LOCAL_BRANCH=$1
     run git fetch --all
     run git checkout $LOCAL_BRANCH
     echo "checkout $?"
@@ -79,6 +80,7 @@ function get-update() {
 
 # Pushes updates to origin master
 function push-update() {
+    LOCAL_BRANCH=$1
     run git checkout master;
     if [ $? -ne 0 ]; then
         echo "Error";
