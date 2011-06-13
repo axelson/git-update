@@ -1,6 +1,7 @@
 #!/bin/bash
 LOCAL_BRANCH=${GIT_LOCAL_BRANCH};
 
+SCRIPT_DIRECTORY=$(cd $(dirname $(readlink -f $0)) && pwd)
 command=$1;
 
 function usage() {
@@ -35,7 +36,7 @@ if [ $? -ne 0 ]; then
     exit 1;
 fi
 
-source functions.sh
+source $SCRIPT_DIRECTORY/functions.sh
 
 case "$command" in
     push) echo "Going to push";
