@@ -10,13 +10,12 @@ function get-local-branch() {
         echo -n "Going to store local branch name in your git config, continue? [y/N]: ";
         read ans
         case $ans in
-            y|Y|yes|Yes) echo "writing to config" ;;
+            y|Y|yes|Yes) echo "Writing to config" ;;
             *) echo "Exiting. Cannot run without knowing the local branch"; exit 1 ;;
         esac
         git config update.branch $branchName
         branch=$(git config update.branch)
     fi
-    echo "branch name is: $branch";
 }
 
 
