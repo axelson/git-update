@@ -1,5 +1,22 @@
 # Gets the name of the local branch, prompting the user if necessary
 function get-local-branch() {
+    branch=$(git config update.branch)
+    if [ $? -ne 0 ]; then
+        echo "Existing branches:";
+        git branch
+        echo -n "What is the name of your local branch? ";
+        read branchName
+        echo "You entered $branchName"
+        echo -n "Going to store local branch name in your git config, continue? [y/N]: ";
+        read ans
+        case $ans in
+            y|Y|yes|Yes) echo "writing to config" ;;
+            *) echo "Exiting. Cannot run without knowing the local branch"; exit 1 ;;
+        esac
+        git config update.branch $branchName
+        branch=$(git config update.branch)
+    fi
+    echo "branch name is: $branch";
 }
 
 
