@@ -38,6 +38,9 @@ fi
 
 source $SCRIPT_DIRECTORY/functions.sh
 
+get-local-branch
+localBranch=$branch
+
 case "$command" in
     push) echo "Going to push";
         push-update;
