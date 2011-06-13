@@ -29,6 +29,10 @@ git update get
 git update push
 ```
 
+When tig launches cherry-pick the commits you want to move from the local branch to master by using ```j/k``` to navigate to the commit and
+```C``` to cherry-pick. If a cherry-pick fails quit tig by pressing ```q``` and Ctrl-c to abort git update. Then do the cherry-pick
+manually.
+
 TODO
 ====
 * Maybe include a script to copy git-update.sh into the git-exec directory (like git flow)
