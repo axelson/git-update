@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SCRIPT_DIRECTORY=$(cd $(dirname $(readlink -f $0)) && pwd)
+READLINK="readlink"
+SCRIPT_DIRECTORY=$(cd $(dirname $(${READLINK} -f $0)) && pwd)
 command=$1;
 
 function usage() {
