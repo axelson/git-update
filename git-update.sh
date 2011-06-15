@@ -1,6 +1,17 @@
 #!/bin/bash
 
-READLINK="readlink"
+OS=$(uname -a|awk '{print $1}')
+# Expected values Linux, Darwin
+echo "os is $OS"
+
+case $OS in
+    Linux) READLINK="readlink" ;;
+    Darwin) READLINK="greadlink" ;;
+    *) echo "Unable to handle OS $OS, exiting" >&2;
+        exit 1;
+    ;;
+esac
+
 SCRIPT_DIRECTORY=$(cd $(dirname $(${READLINK} -f $0)) && pwd)
 command=$1;
 
