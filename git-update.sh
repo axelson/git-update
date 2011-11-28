@@ -31,8 +31,6 @@ function run() {
     eval $@;
 }
 
-cd $HOME/config
-
 run git diff --exit-code >/dev/null
 if [ $? -ne 0 ]; then
     echo "Error: git diff reports non-clean directory";
