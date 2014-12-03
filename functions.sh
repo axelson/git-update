@@ -1,58 +1,62 @@
 # Gets the name of the local branch, prompting the user if necessary
-function get-local-branch() {
-    branch=$(git config update.branch)
-    if [ $? -ne 0 ]; then
-        echo "Existing branches:";
-        git branch
-        echo -n "What is the name of your local branch? ";
+SAVE_BRANCH="git_update_tmp_save_branch";
+function get-config-branch() {
+    local branchType=$1
+    local branch=$(git config update.${branchType})
+    if [ -z "$branch" ]; then
+        echoerr "Existing branches:";
+        git branch 1>&2;
+        echoerr -n "What is the name of your ${branchType} branch? ";
         read branchName
-        echo "You entered $branchName"
-        echo -n "Going to store local branch name in your git config, continue? [y/N]: ";
+        echoerr "You entered $branchName"
+        echoerr -n "Going to store ${branchType} branch name in your git config, continue? [y/N]: ";
         read ans
         case $ans in
-            y|Y|yes|Yes) echo "Writing to config" ;;
-            *) echo "Exiting. Cannot run without knowing the local branch"; exit 1 ;;
+            y|Y|yes|Yes) echoerr "Writing to config" ;;
+            *) echoerr "Exiting. Cannot run without knowing the ${branchType} branch"; exit 1 ;;
         esac
-        git config update.branch $branchName
+        git config update.${branchType} $branchName
         branch=$(git config update.branch)
     fi
+    echo $branch
 }
 
 
-# Gets the update from the origin master
+# Gets the update from the upstream branch (typically origin/master)
 function get-update() {
-    LOCAL_BRANCH=$1
+    local LOCAL_BRANCH=$1
+    local UPSTREAM_BRANCH=$2
     run git fetch --all
     run git checkout $LOCAL_BRANCH
-    echo "checkout $?"
-    run git branch save
+    echoerr "checkout $?"
+    run git branch $SAVE_BRANCH
     if [ $? -eq 128 ]; then
-        run git branch -D save;
-        run git branch save;
+        run git branch -D $SAVE_BRANCH;
+        run git branch $SAVE_BRANCH;
     fi
 
-    run git rebase origin/master
+    run git rebase origin/$UPSTREAM_BRANCH
     if [ $? -ge 1 ]; then
-        echo "Rebase not successful, aborting";
+        echoerr "Rebase not successful, aborting";
         run git rebase --abort;
-        run git branch -d save;
+        run git branch -d $SAVE_BRANCH;
         exit 1;
     fi
 
-    run git checkout master
+    run git checkout $UPSTREAM_BRANCH
     if [ $? -ne 0 ]; then
-        echo "Error";
+        echoerr "Error";
         exit 1;
     fi
 
-    run git merge --ff-only origin/master
+    run git merge --ff-only origin/$UPSTREAM_BRANCH
     if [ $? -ne 0 ]; then
-        echo "Error: Could not fastforward, trying a rebase";
+        echoerr "Error: Could not fastforward, trying a rebase";
         sleep 3;
-        echo "Trying now";
-        run git rebase origin/master
+        echoerr "Trying now";
+        run git rebase origin/$UPSTREAM_BRANCH
         if [ $? -ge 1 ]; then
-            echo "Rebase not successful, aborting";
+            echoerr "Rebase not successful, aborting";
             run git rebase --abort;
             exit 1;
         fi
@@ -60,79 +64,79 @@ function get-update() {
 
     run git checkout $LOCAL_BRANCH
     if [ $? -ne 0 ]; then
-        echo "Error";
+        echoerr "Error";
         exit 1;
     fi
 
-    run git branch -D save;
+    run git branch -D $SAVE_BRANCH;
     if [ $? -ne 0 ]; then
-        echo "Error";
-        exit 1;
-    fi
-
-    run git push -f origin $LOCAL_BRANCH
-    if [ $? -ne 0 ]; then
-        echo "Error pushing local branch";
+        echoerr "Error";
         exit 1;
     fi
 }
 
 
-# Pushes updates to origin master
+# Pushes updates to upstream branch
 function push-update() {
-    LOCAL_BRANCH=$1
-    run git checkout master;
+    local LOCAL_BRANCH=$1
+    local UPSTREAM_BRANCH=$2
+    run git checkout $UPSTREAM_BRANCH;
     if [ $? -ne 0 ]; then
-        echo "Error";
+        echoerr "Error";
         exit 1;
     fi
 
-    tig master origin/master $LOCAL_BRANCH;
+    tig $UPSTREAM_BRANCH origin/$UPSTREAM_BRANCH $LOCAL_BRANCH;
     if [ $? -ne 0 ]; then
-        echo "Tig returned error, exiting";
+        echoerr "Tig returned error, exiting";
         exit 1;
     fi
 
 
-    echo -n "Sleeping if you want to abort..."
+    echoerr -n "Sleeping if you want to abort..."
     sleep 4;
-    echo "Done"
+    echoerr "Done"
 
     run git checkout $LOCAL_BRANCH;
     if [ $? -ne 0 ]; then
-        echo "Error";
+        echoerr "Error";
         exit 1;
     fi
 
-    run git branch save
+    run git branch $SAVE_BRANCH
     if [ $? -eq 128 ]; then
-        run git branch -D save;
-        run git branch save;
+        run git branch -D $SAVE_BRANCH;
+        run git branch $SAVE_BRANCH;
     fi
 
-    run git rebase master
+    run git rebase $UPSTREAM_BRANCH
     if [ $? -ge 1 ]; then
-        echo "Rebase not successful, resetting";
-        run git reset --hard save;
-        run git branch -d save;
+        echoerr "Rebase not successful, resetting";
+        run git reset --hard $SAVE_BRANCH;
+        run git branch -d $SAVE_BRANCH;
         exit 1;
     fi
 
-    run git branch -D save;
+    run git branch -D $SAVE_BRANCH;
     if [ $? -ne 0 ]; then
-        echo "Error";
+        echoerr "Error";
         exit 1;
     fi
 
-    run git push origin master
+    run git push origin $UPSTREAM_BRANCH
     if [ $? -ne 0 ]; then
-        echo "Error pushing master branch";
-        exit 1;
-    fi
-
-    run git push -f origin $LOCAL_BRANCH
-    if [ $? -ne 0 ]; then
-        echo "Error pushing local branch";
+        echoerr "Error pushing $UPSTREAM_BRANCH branch";
         exit 1;
     fi
 }
+
+function push-local-branch() {
+    local LOCAL_BRANCH=$1
+    run git push -f origin $LOCAL_BRANCH
+    if [ $? -ne 0 ]; then
+        echoerr "Error pushing local branch";
+        exit 1;
+    fi
+}
+
+function echoerr() { echo "$@" 1>&2; }

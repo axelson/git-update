@@ -23,6 +23,7 @@ Operation can be one of the following:
     get: Get updates from the master branch
     push: Push updates from the master branch (requires tig)
 EOF
+exit 1;
 }
 
 function run() {
@@ -39,17 +40,22 @@ fi
 
 source $SCRIPT_DIRECTORY/functions.sh
 
-get-local-branch
-localBranch=$branch
+localBranch=$(get-config-branch localBranch)
+upstreamBranch=$(get-config-branch upstreamBranch)
+# TODO: create new user input function that is not branch specific
+pushLocalBranch=$(get-config-branch pushLocalBranch)
 
 case "$command" in
     push) echo "Going to push";
-        push-update $localBranch;
+        push-update $localBranch $upstreamBranch;
         ;;
     get) echo "Going to update";
-        get-update $localBranch;
+        get-update $localBranch $upstreamBranch;
         ;;
     *) echo "Didn't understand command \"$command\"";
         usage;
         ;;
 esac
+if [ "$pushLocalBranch" == 'y' ]; then
+    push-local-branch $localBranch
+fi
