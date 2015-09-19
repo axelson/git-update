@@ -52,7 +52,7 @@ function get-update() {
     run git merge --ff-only origin/$UPSTREAM_BRANCH
     if [ $? -ne 0 ]; then
         echoerr "Error: Could not fastforward, trying a rebase";
-        sleep 3;
+        sleep 2;
         echoerr "Trying now";
         run git rebase origin/$UPSTREAM_BRANCH
         if [ $? -ge 1 ]; then
@@ -94,7 +94,7 @@ function push-update() {
 
 
     echoerr -n "Sleeping if you want to abort..."
-    sleep 4;
+    sleep 2;
     echoerr "Done"
 
     run git checkout $LOCAL_BRANCH;

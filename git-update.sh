@@ -22,6 +22,7 @@ usage: git update operation
 Operation can be one of the following:
     get: Get updates from the master branch
     push: Push updates from the master branch (requires tig)
+    sync: run get, then run push
 EOF
 exit 1;
 }
@@ -51,6 +52,10 @@ case "$command" in
         ;;
     get) echo "Going to update";
         get-update $localBranch $upstreamBranch;
+        ;;
+    sync) echo "Going to do sync";
+        get-update $localBranch $upstreamBranch;
+        push-update $localBranch $upstreamBranch;
         ;;
     *) echo "Didn't understand command \"$command\"";
         usage;
